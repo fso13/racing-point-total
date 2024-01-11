@@ -5,15 +5,17 @@ using System.IO;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Tab;
 using Label = System.Windows.Forms.Label;
 
 namespace Racing
 {
     public partial class MainForm : Form
     {
+
+        List<Racer> racers = new List<Racer>();
         private int gridSize = 30;
         private int newGridSize = 30;
-        private List<PointLabel> points = new List<PointLabel>();
         private Point movingPoint;
 
         public MainForm()
@@ -23,6 +25,8 @@ namespace Racing
             pictureBox1.MouseDown += PictureBox1_MouseDown;
             pictureBox1.MouseUp += PictureBox1_MouseUp;
             pictureBox1.MouseMove += PictureBox1_MouseMove;
+
+            pictureBox1.Enabled = false;
         }
 
         private void PictureBox1_Paint(object sender, PaintEventArgs e)
@@ -40,37 +44,45 @@ namespace Racing
                 }
             }
 
-            // Рисуем точки
-            for (int i = 0; i < points.Count; i++)
+            foreach (Racer rac in racers)
             {
-                PointLabel point = points[i];
-                point.point.X = point.point.X / gridSize * newGridSize;
-                point.point.Y = point.point.Y / gridSize * newGridSize;
-                e.Graphics.FillEllipse(Brushes.Coral, point.point.X / gridSize * newGridSize - 4, point.point.Y - 4, 8, 8);
-                this.Text = point.point.X + " " + point.point.Y;
-                point.label.Name = "label_1_" + i;
-                point.label.Text = (i + 1).ToString();
-                point.label.Location = new Point(point.point.X - 25, point.point.Y - 15);
-                this.Controls.Add(point.label);
-                point.label.BringToFront();
-
-
-            }
-            gridSize = newGridSize;
-            Double total = 0;
-
-            using (Pen gridPen = new Pen(Color.Red))
-                for (int x = 0; x < points.Count - 1; x++)
+                // Рисуем точки
+                for (int i = 0; i < rac.points.Count; i++)
                 {
-                    Point one = points[x].point;
-                    Point two = points[x + 1].point;
+                    PointLabel point = rac.points[i];
+                    point.point.X = point.point.X / gridSize * newGridSize;
+                    point.point.Y = point.point.Y / gridSize * newGridSize;
+                    e.Graphics.FillEllipse(new SolidBrush(rac.colorPoint), point.point.X / gridSize * newGridSize - 4, point.point.Y - 4, 8, 8);
+                    this.Text = point.point.X + " " + point.point.Y;
+                    point.label.Name = "label_1_" + i;
+                    point.label.Text = (i + 1).ToString();
+                    point.label.Location = new Point(point.point.X - 25, point.point.Y - 15);
+                    this.Controls.Add(point.label);
+                    point.label.BringToFront();
 
-                    e.Graphics.DrawLine(gridPen, one.X, one.Y, two.X, two.Y);
-
-                    total += Math.Round(Math.Sqrt(Math.Pow(one.X / gridSize - two.X / gridSize, 2) + Math.Pow(one.Y / gridSize - two.Y / gridSize, 2)), 3);
 
                 }
-            label1.Text = "Счёт: " + Math.Round(total, 3) + "  |  Скороcть: " + Math.Round(Math.Round(total, 3) / points.Count, 3);
+
+                gridSize = newGridSize;
+                Double total = 0;
+
+                using (Pen gridPen = new Pen(rac.colorPath))
+                    for (int x = 0; x < rac.points.Count - 1; x++)
+                    {
+                        Point one = rac.points[x].point;
+                        Point two = rac.points[x + 1].point;
+
+                        e.Graphics.DrawLine(gridPen, one.X, one.Y, two.X, two.Y);
+
+                        total += Math.Round(Math.Sqrt(Math.Pow(one.X / gridSize - two.X / gridSize, 2) + Math.Pow(one.Y / gridSize - two.Y / gridSize, 2)), 3);
+
+                    }
+
+                tabControl1.TabPages[racers.Count - 1].Controls[1].Text = "Расстояние: " + getTotal(rac) + "  |  Скороcть: " + getSpeed(rac);
+                tabControl1.TabPages[racers.Count - 1].Text = String.Format("{0}: N={1} S={2} S/N={3}", rac.name, rac.points.Count, getTotal(rac), getSpeed(rac));
+            }
+          
+
 
         }
 
@@ -97,13 +109,13 @@ namespace Racing
                 int newX = e.X / gridSize * gridSize;
                 int newY = e.Y / gridSize * gridSize;
 
-
-                for (int i = 0; i < points.Count; i++)
+                Racer racer = GetRacer();
+                for (int i = 0; i < racer.points.Count; i++)
                 {
-                    Point p = points[i].point;
+                    Point p = racer.points[i].point;
                     if (p.X == movingPoint.X && p.Y == movingPoint.Y)
                     {
-                        points[i] = new PointLabel(new Point(newX, newY), points[i].label);
+                        racer.points[i] = new PointLabel(new Point(newX, newY), racer.points[i].label);
 
                     }
 
@@ -140,32 +152,42 @@ namespace Racing
                 int newX = e.X / gridSize * gridSize;
                 int newY = e.Y / gridSize * gridSize;
 
+                Racer racer = GetRacer();
 
                 Label label = new Label();
-                label.Name = "label_1_" + points.Count;
-                label.Text = (points.Count + 1).ToString();
+                label.Name = "label_1_" + racer.points.Count;
+                label.Text = (racer.points.Count + 1).ToString();
 
                 label.Size = new Size(20, 15);
-                points.Add(new PointLabel(new Point(newX, newY), label));
-                listBox1.Items.Add(String.Format("{0}: x={1}, y={2}", points.Count, newX / gridSize, newY / gridSize));
+                racer.points.Add(new PointLabel(new Point(newX, newY), label));
+
+                ListBox listBox1 = (ListBox)tabControl1.TabPages[racers.Count-1].Controls[0];
+
+
+                listBox1.Items.Add(String.Format("{0}: x={1}, y={2}", racer.points.Count, newX / gridSize, newY / gridSize));
                 pictureBox1.Invalidate(); // Перерисовываем PictureBox
             }
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
+
+            ListBox listBox1 = (ListBox)tabControl1.TabPages[tabControl1.SelectedIndex].Controls[0];
             if (listBox1.SelectedIndex >= 0)
             {
-                PointLabel pl = points[listBox1.SelectedIndex];
+                Racer racer = racers[tabControl1.SelectedIndex];
+
+
+                PointLabel pl = racer.points[listBox1.SelectedIndex];
 
                 this.Controls.Remove(pl.label);
-                points.RemoveAt(listBox1.SelectedIndex);
+                racer.points.RemoveAt(listBox1.SelectedIndex);
 
                 listBox1.Items.RemoveAt(listBox1.SelectedIndex);
 
-                for (int i = 0; i < points.Count; i++)
+                for (int i = 0; i < racer.points.Count; i++)
                 {
-                    listBox1.Items[i] = (String.Format("{0}: x={1}, y={2}", i + 1, points[i].point.X / gridSize, points[i].point.Y / gridSize));
+                    listBox1.Items[i] = (String.Format("{0}: x={1}, y={2}", i + 1, racer.points[i].point.X / gridSize, racer.points[i].point.Y / gridSize));
                 }
                 pictureBox1.Invalidate(); // Перерисовываем PictureBox
             }
@@ -174,7 +196,7 @@ namespace Racing
 
         private void Form1_Load(object sender, EventArgs e)
         {
-
+            MessageBox.Show("1.Добавить гонщика\n2.Начать гонку.\n3. Завершить гонку.\nПовторить п.п. 1-3 для каждого гонщика.");
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -212,6 +234,91 @@ namespace Racing
             newGridSize = ((int)numericUpDown1.Value);
 
             pictureBox1.Invalidate(); // Перерисовываем PictureBox
+
+        }
+
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            NewRacerForm newRacerForm = new NewRacerForm();
+            newRacerForm.ShowDialog();
+            racers.Add(newRacerForm.Racer);
+            button4.Enabled = true;
+
+
+
+            TabPage tabPage = new TabPage(GetRacer().name);
+            ListBox listBox = new ListBox();
+            listBox.Location = new Point(10, 10);
+            listBox.Dock = DockStyle.Fill;
+            tabPage.Tag = GetRacer();
+            // Добавление ListBox на вкладку
+            tabPage.Controls.Add(listBox);
+
+            // Добавление вкладки в TabControl
+            tabControl1.TabPages.Add(tabPage);
+            tabControl1.SelectedTab = tabPage;
+
+            Label label = new Label();
+            label.Text = "Расстояние: 0 | Скороcть: 0";
+            label.Dock = DockStyle.Bottom;
+            tabPage.Controls.Add(label);
+
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+
+            if (button3.Enabled)
+            {
+                pictureBox1.Enabled = true;
+                button3.Enabled = false;
+                button4.Text = "Закончить гонку";
+            }
+            else
+            {
+                pictureBox1.Enabled = false;
+                button3.Enabled = true;
+                button4.Text = "Начать гонку";
+                button4.Enabled = false;
+
+                Racer racer = GetRacer();
+                string s =String.Format("Гонщик: {0} | Расстояние:{1} | Скороcть:{2}", racer.name, getTotal(racer), getSpeed(racer));
+
+                ListBox listBox = (ListBox)tabControl1.TabPages[racers.Count - 1].Controls[0];
+                listBox.Items.Add(s);
+            }
+
+        }
+
+        private Double getTotal(Racer racer)
+        {
+            Double total = 0;
+            for (int x = 0; x < racer.points.Count - 1; x++)
+            {
+                Point one = racer.points[x].point;
+                Point two = racer.points[x + 1].point;
+                total += Math.Round(Math.Sqrt(Math.Pow(one.X / gridSize - two.X / gridSize, 2) + Math.Pow(one.Y / gridSize - two.Y / gridSize, 2)), 3);
+
+            }
+
+            return Math.Round(total,3);
+        }
+
+
+        private Double getSpeed(Racer racer)
+        {
+            return Math.Round(getTotal(racer) / racer.points.Count, 3);
+        }
+
+
+        private Racer GetRacer()
+        {
+            return racers[racers.Count - 1];
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
 
         }
     }

@@ -8,13 +8,15 @@ namespace Racing
     internal class Racer
     {
         public List<PointLabel> points = new List<PointLabel>();
-        public System.Drawing.Color colorPoint;
-        public System.Drawing.Color colorPath;
+        public Color colorPoint;
+        public Color colorPath;
+        public string name;
 
-        public Racer(Color colorPoint, Color colorPath)
+        public Racer(Color colorPoint, Color colorPath, string name)
         {
             this.colorPoint = colorPoint;
             this.colorPath = colorPath;
+            this.name = name;
         }
     }
 }
