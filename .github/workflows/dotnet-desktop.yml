@@ -36,7 +36,7 @@ jobs:
     - name: Build and Publish Web App
       run: msbuild Racing.sln /p:Configuration=Release
     - name: Upload Artifact
-      uses: actions/upload-artifact@v1.0.0
+      uses: actions/upload-artifact@v4
       with:
         name: Release Binaries
         path: ./Racing/bin/Release
