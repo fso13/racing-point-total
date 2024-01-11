@@ -8,7 +8,7 @@ using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
 
-namespace Гонка2
+namespace Racing
 {
     internal class PointLabel
 

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Windows.Forms;
 
-namespace Гонка2
+namespace Racing
 {
     internal static class Program
     {

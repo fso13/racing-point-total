@@ -5,7 +5,7 @@ using System.IO;
 using System.Windows.Forms;
 using Label = System.Windows.Forms.Label;
 
-namespace Гонка2
+namespace Racing
 {
     public partial class MainForm : Form
     {

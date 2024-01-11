@@ -1,4 +1,4 @@
-﻿namespace Гонка2
+﻿namespace Racing
 {
     partial class MainForm
     {
