@@ -70,8 +70,7 @@ namespace Racing
                     total += Math.Round(Math.Sqrt(Math.Pow(one.X / gridSize - two.X / gridSize, 2) + Math.Pow(one.Y / gridSize - two.Y / gridSize, 2)), 3);
 
                 }
-            label1.Text = "Счёт: " + Math.Round(total, 3);
-            label2.Text = "Скороcть: " + Math.Round(Math.Round(total, 3) / points.Count, 3);
+            label1.Text = "Счёт: " + Math.Round(total, 3) + "  |  Скороcть: " + Math.Round(Math.Round(total, 3) / points.Count, 3);
 
         }
 
