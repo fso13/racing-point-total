@@ -17,7 +17,7 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '2.0.x'  # Replace with the appropriate .NET Core version
+          dotnet-version: '2.1.x'  # Replace with the appropriate .NET Core version
 
       - name: Build
         run: dotnet build --configuration Release
