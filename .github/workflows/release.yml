@@ -3,7 +3,7 @@ name: Create Release and Upload Executable
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   build:
