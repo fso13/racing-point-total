@@ -33,39 +33,25 @@ jobs:
         $newVersion
         # Setting env variable to make available in next step is wired https://www.jamescroft.co.uk/setting-github-actions-environment-variables-in-powershell/.
         echo "newVersion=$newVersion" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
-    - name: Build and Publish Web App
-      run: msbuild Racing.sln /p:Configuration=Release
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: Release Binaries
-        path: ./Racing/bin/Release
+
     - name: Create Release
-      id: create_release
-      uses: actions/create-release@latest
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: v${{ env.newVersion }}
-        release_name: v${{ env.newVersion }}
-        body: |
-            Automated Release by GitHub Action CI
-        draft: false
-        prerelease: false
-    - name: Upload Assets to Release
-      id: upload-release-asset
+    id: create_release
+    uses: softprops/action-gh-release@v1
+    with:
+      files: |
+        ./Racing/bin/Release/Racing.exe  # Replace with the actual path to your executable
+      token: ${{ secrets.GITHUB_TOKEN }}
+      tag_name: v${{ env.newVersion }}
+      release_name: v${{ env.newVersion }}
+      body: |
+        Automated Release by GitHub Action CI
+
+    - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./Racing.exe
-        asset_name: Racing.exe
+        asset_path: ./Racing/bin/Release/Racing.exe  # Replace with the actual path to your executable
+        asset_name: Racing.exe  # Replace with the desired name for the uploaded asset
         asset_content_type: application/octet-stream
-    - name: Delete Old Release
-      uses: dev-drprasad/delete-older-releases@v0.2.0
-      with:
-        keep_latest: 3
-        delete_tag_pattern: true
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+
