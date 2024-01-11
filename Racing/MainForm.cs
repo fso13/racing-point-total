@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Reflection;
 using System.Reflection.Emit;
 using System.Windows.Forms;
 using Label = System.Windows.Forms.Label;
@@ -10,7 +11,8 @@ namespace Racing
 {
     public partial class MainForm : Form
     {
-        private const int gridSize = 30;
+        private int gridSize = 30;
+        private int newGridSize = 30;
         private List<PointLabel> points = new List<PointLabel>();
         private Point movingPoint;
 
@@ -28,11 +30,11 @@ namespace Racing
             // Рисуем сетку
             using (Pen gridPen = new Pen(Color.LightGray))
             {
-                for (int x = 0; x < pictureBox1.Width; x += gridSize)
+                for (int x = 0; x < pictureBox1.Width; x += newGridSize)
                 {
                     e.Graphics.DrawLine(gridPen, x, 0, x, pictureBox1.Height);
                 }
-                for (int y = 0; y < pictureBox1.Height; y += gridSize)
+                for (int y = 0; y < pictureBox1.Height; y += newGridSize)
                 {
                     e.Graphics.DrawLine(gridPen, 0, y, pictureBox1.Width, y);
                 }
@@ -42,13 +44,19 @@ namespace Racing
             for (int i = 0; i < points.Count; i++)
             {
                 PointLabel point = points[i];
-                e.Graphics.FillEllipse(Brushes.Coral, point.point.X - 4, point.point.Y - 4, 8, 8);
+                point.point.X = point.point.X / gridSize * newGridSize;
+                point.point.Y = point.point.Y / gridSize * newGridSize;
+                e.Graphics.FillEllipse(Brushes.Coral, point.point.X / gridSize * newGridSize - 4, point.point.Y - 4, 8, 8);
                 this.Text = point.point.X + " " + point.point.Y;
                 point.label.Name = "label_1_" + i;
                 point.label.Text = (i + 1).ToString();
+                point.label.Location = new Point(point.point.X - 25, point.point.Y - 15);
                 this.Controls.Add(point.label);
                 point.label.BringToFront();
+
+
             }
+            gridSize = newGridSize;
             Double total = 0;
 
             using (Pen gridPen = new Pen(Color.Red))
@@ -62,14 +70,15 @@ namespace Racing
                     total += Math.Round(Math.Sqrt(Math.Pow(one.X / gridSize - two.X / gridSize, 2) + Math.Pow(one.Y / gridSize - two.Y / gridSize, 2)), 3);
 
                 }
-            label1.Text = Math.Round(total, 3).ToString();
+            label1.Text = "Счёт: " + Math.Round(total, 3);
+            label2.Text = "Скороcть: " + Math.Round(Math.Round(total, 3) / points.Count, 3);
 
         }
 
         private void PictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
 
-            
+
             if (e.Button == MouseButtons.Right && movingPoint.IsEmpty)
             {
                 int newX = e.X / gridSize * gridSize;
@@ -79,28 +88,28 @@ namespace Racing
                 this.Text = newX + " " + newY;
             }
 
-            
+
         }
 
         private void PictureBox1_MouseUp(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right && !movingPoint.IsEmpty)
             {
-                int newX = e.X / gridSize* gridSize;
+                int newX = e.X / gridSize * gridSize;
                 int newY = e.Y / gridSize * gridSize;
 
 
                 for (int i = 0; i < points.Count; i++)
                 {
                     Point p = points[i].point;
-                    if(p.X == movingPoint.X && p.Y == movingPoint.Y)
+                    if (p.X == movingPoint.X && p.Y == movingPoint.Y)
                     {
-                        points[i] = new PointLabel(new Point(newX,newY), points[i].label);
+                        points[i] = new PointLabel(new Point(newX, newY), points[i].label);
 
                     }
 
                 }
-                
+
 
                 this.Text = newX + " " + newY;
                 pictureBox1.Invalidate(); // Перерисовываем PictureBox
@@ -117,8 +126,8 @@ namespace Racing
             {
                 int newX = e.X / gridSize * gridSize;
                 int newY = e.Y / gridSize * gridSize;
-                this.Text = newX+ " " + newY;
-                
+                this.Text = newX + " " + newY;
+
 
             }
 
@@ -135,7 +144,7 @@ namespace Racing
 
                 Label label = new Label();
                 label.Name = "label_1_" + points.Count;
-                label.Text = (points.Count+1).ToString();
+                label.Text = (points.Count + 1).ToString();
 
                 label.Size = new Size(20, 15);
                 points.Add(new PointLabel(new Point(newX, newY), label));
@@ -197,6 +206,14 @@ namespace Racing
             }
 
             pictureBox1.BackgroundImage = Image.FromFile(filePath);
+        }
+
+        private void numericUpDown1_ValueChanged(object sender, EventArgs e)
+        {
+            newGridSize = ((int)numericUpDown1.Value);
+
+            pictureBox1.Invalidate(); // Перерисовываем PictureBox
+
         }
     }
 }
