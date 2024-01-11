@@ -14,10 +14,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Setup .NET Core
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: '2.1.x'  # Replace with the appropriate .NET Core version
+      - name: Setup MSBuild Path
+        uses: microsoft/setup-msbuild@v1.0.2
+       
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v1.0.5
 
       - name: Build
         run: dotnet build --configuration Release
