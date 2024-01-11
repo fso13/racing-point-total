@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Reflection.Emit;
 using System.Windows.Forms;
 using Label = System.Windows.Forms.Label;
 
@@ -38,11 +39,13 @@ namespace Racing
             }
 
             // Рисуем точки
-            foreach (PointLabel point in points)
+            for (int i = 0; i < points.Count; i++)
             {
+                PointLabel point = points[i];
                 e.Graphics.FillEllipse(Brushes.Coral, point.point.X - 4, point.point.Y - 4, 8, 8);
                 this.Text = point.point.X + " " + point.point.Y;
-
+                point.label.Name = "label_1_" + i;
+                point.label.Text = (i + 1).ToString();
                 this.Controls.Add(point.label);
                 point.label.BringToFront();
             }
@@ -143,10 +146,21 @@ namespace Racing
 
         private void button2_Click(object sender, EventArgs e)
         {
-            points.RemoveAt(listBox1.SelectedIndex);
+            if (listBox1.SelectedIndex >= 0)
+            {
+                PointLabel pl = points[listBox1.SelectedIndex];
 
-            listBox1.Items.RemoveAt(listBox1.SelectedIndex);
-            pictureBox1.Invalidate(); // Перерисовываем PictureBox
+                this.Controls.Remove(pl.label);
+                points.RemoveAt(listBox1.SelectedIndex);
+
+                listBox1.Items.RemoveAt(listBox1.SelectedIndex);
+
+                for (int i = 0; i < points.Count; i++)
+                {
+                    listBox1.Items[i] = (String.Format("{0}: x={1}, y={2}", i + 1, points[i].point.X / gridSize, points[i].point.Y / gridSize));
+                }
+                pictureBox1.Invalidate(); // Перерисовываем PictureBox
+            }
 
         }
 
