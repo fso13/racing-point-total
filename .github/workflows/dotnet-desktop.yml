@@ -35,16 +35,16 @@ jobs:
         echo "newVersion=$newVersion" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
 
     - name: Create Release
-    id: create_release
-    uses: softprops/action-gh-release@v1
-    with:
-      files: |
-        ./Racing/bin/Release/Racing.exe  # Replace with the actual path to your executable
-      token: ${{ secrets.GITHUB_TOKEN }}
-      tag_name: v${{ env.newVersion }}
-      release_name: v${{ env.newVersion }}
-      body: |
-        Automated Release by GitHub Action CI
+      id: create_release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          ./Racing/bin/Release/Racing.exe  # Replace with the actual path to your executable
+        token: ${{ secrets.GITHUB_TOKEN }}
+        tag_name: v${{ env.newVersion }}
+        release_name: v${{ env.newVersion }}
+        body: |
+          Automated Release by GitHub Action CI
 
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
