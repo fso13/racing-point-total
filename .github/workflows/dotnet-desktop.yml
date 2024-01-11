@@ -39,7 +39,7 @@ jobs:
       uses: actions/upload-artifact@v1.0.0
       with:
         name: Release Binaries
-        path: ./bin/Release
+        path: ./Racing/bin/Release
     - name: Create Release
       id: create_release
       uses: actions/create-release@latest
