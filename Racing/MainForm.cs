@@ -2,21 +2,21 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using System.Reflection;
-using System.Reflection.Emit;
 using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Tab;
+using Image = System.Drawing.Image;
 using Label = System.Windows.Forms.Label;
 
 namespace Racing
 {
     public partial class MainForm : Form
     {
+        private float zoom = 1.0f;
 
         List<Racer> racers = new List<Racer>();
         private int gridSize = 30;
         private int newGridSize = 30;
         private Point movingPoint;
+        private Image image;
 
         public MainForm()
         {
@@ -25,14 +25,14 @@ namespace Racing
             pictureBox1.MouseDown += PictureBox1_MouseDown;
             pictureBox1.MouseUp += PictureBox1_MouseUp;
             pictureBox1.MouseMove += PictureBox1_MouseMove;
+            pictureBox1.MouseWheel += pictureBox1_MouseWheel;
 
-            pictureBox1.Enabled = false;
         }
 
         private void PictureBox1_Paint(object sender, PaintEventArgs e)
         {
             // Рисуем сетку
-            using (Pen gridPen = new Pen(Color.LightGray))
+            using (Pen gridPen = new Pen(Color.LightGray,1))
             {
                 for (int x = 0; x < pictureBox1.Width; x += newGridSize)
                 {
@@ -104,7 +104,7 @@ namespace Racing
 
         private void PictureBox1_MouseUp(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Right && !movingPoint.IsEmpty)
+            if (e.Button == MouseButtons.Right && !movingPoint.IsEmpty && !button3.Enabled)
             {
                 int newX = e.X / gridSize * gridSize;
                 int newY = e.Y / gridSize * gridSize;
@@ -133,7 +133,7 @@ namespace Racing
         private void PictureBox1_MouseMove(object sender, MouseEventArgs e)
         {
 
-            if (e.Button == MouseButtons.Right && !movingPoint.IsEmpty)
+            if (e.Button == MouseButtons.Right && !movingPoint.IsEmpty && !button3.Enabled)
             {
                 int newX = e.X / gridSize * gridSize;
                 int newY = e.Y / gridSize * gridSize;
@@ -146,7 +146,7 @@ namespace Racing
 
         private void pictureBox1_MouseClick(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Left)
+            if (e.Button == MouseButtons.Left && !button3.Enabled)
             {
                 // Добавляем новую точку на пересечение сетки
                 int newX = e.X / gridSize * gridSize;
@@ -225,8 +225,10 @@ namespace Racing
                     }
                 }
             }
+            image = Image.FromFile(filePath);
 
-            pictureBox1.BackgroundImage = Image.FromFile(filePath);
+            pictureBox1.Image = image;
+
         }
 
         private void numericUpDown1_ValueChanged(object sender, EventArgs e)
@@ -320,6 +322,46 @@ namespace Racing
         private void button5_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void pictureBox1_MouseWheel(object sender, MouseEventArgs e)
+        {
+            if (e.Delta > 0)
+            {
+                zoom += 0.01f;
+            }
+            else
+            {
+                zoom -= 0.01f;
+            }
+
+            if (zoom < 0.01f)
+            {
+                zoom = 0.01f;
+            }
+
+            UpdateImage();
+        }
+
+        private void UpdateImage()
+        {
+            if (image != null)
+            {
+                int newWidth = (int)(image.Width * zoom);
+                int newHeight = (int)(image.Height * zoom);
+
+                Bitmap bmp = new Bitmap(newWidth, newHeight);
+                Graphics g = Graphics.FromImage(bmp);
+                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                g.DrawImage(image, new Rectangle(0, 0, newWidth, newHeight));
+
+                pictureBox1.Image = bmp;
+            }
+        }
+
+        private void pictureBox1_MouseEnter(object sender, EventArgs e)
+        {
+            pictureBox1.Focus();
         }
     }
 }
