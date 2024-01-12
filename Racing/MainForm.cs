@@ -225,9 +225,14 @@ namespace Racing
                     }
                 }
             }
-            image = Image.FromFile(filePath);
 
-            pictureBox1.Image = image;
+            if(filePath != string.Empty)
+            {
+                image = Image.FromFile(filePath);
+
+                pictureBox1.Image = image;
+
+            }
 
         }
 
