@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Reflection.Emit;
 using System.Windows.Forms;
 using Image = System.Drawing.Image;
 using Label = System.Windows.Forms.Label;
@@ -18,6 +19,9 @@ namespace Racing
         private Point movingPoint;
         private Image image;
 
+        List<Label> formLabelsX = new List<Label>();
+        List<Label> formLabelsY = new List<Label>();
+
         public MainForm()
         {
             InitializeComponent();
@@ -31,16 +35,44 @@ namespace Racing
 
         private void PictureBox1_Paint(object sender, PaintEventArgs e)
         {
+            for(int i = 0; i < formLabelsX.Count; i++)
+            {
+                this.Controls.Remove(formLabelsX[i]);
+            }
+
+
+            for (int i = 0; i < formLabelsY.Count; i++)
+            {
+                this.Controls.Remove(formLabelsY[i]);
+            }
             // Рисуем сетку
             using (Pen gridPen = new Pen(Color.LightGray,1))
             {
                 for (int x = 0; x < pictureBox1.Width; x += newGridSize)
                 {
-                    e.Graphics.DrawLine(gridPen, x, 0, x, pictureBox1.Height);
+                    e.Graphics.DrawLine(gridPen, x, 0, x, pictureBox1.Height);                    
+
+                    Label label = new Label();
+                    label.Name = "label_x_" +x;
+                    label.Text = (x / newGridSize).ToString();
+                    label.Location = new Point(x , 5);
+                    label.Size = new Size(20, 15);
+                    formLabelsX.Add(label);
+                    this.Controls.Add(label);
+                    label.BringToFront();
                 }
                 for (int y = 0; y < pictureBox1.Height; y += newGridSize)
                 {
                     e.Graphics.DrawLine(gridPen, 0, y, pictureBox1.Width, y);
+
+                    Label label = new Label();
+                    label.Name = "label_y_" + y;
+                    label.Text = (y / newGridSize).ToString();
+                    label.Location = new Point(5, y +newGridSize / 2);
+                    label.Size = new Size(20, 15);
+                    formLabelsY.Add(label);
+                    this.Controls.Add(label);
+                    label.BringToFront();
                 }
             }
 
