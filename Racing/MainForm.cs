@@ -18,7 +18,7 @@ namespace Racing
         private int newGridSize = 30;
         private Point movingPoint;
         private Image image;
-
+        Color gridColor = Color.LightGray;
         List<Label> formLabelsX = new List<Label>();
         List<Label> formLabelsY = new List<Label>();
 
@@ -46,7 +46,7 @@ namespace Racing
                 this.Controls.Remove(formLabelsY[i]);
             }
             // Рисуем сетку
-            using (Pen gridPen = new Pen(Color.LightGray,1))
+            using (Pen gridPen = new Pen(gridColor,1))
             {
                 for (int x = 0; x < pictureBox1.Width; x += newGridSize)
                 {
@@ -228,7 +228,12 @@ namespace Racing
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            MessageBox.Show("1.Добавить гонщика\n2.Начать гонку.\n3. Завершить гонку.\nПовторить п.п. 1-3 для каждого гонщика.");
+            MessageBox.Show("1.Добавить гонщика\n2.Начать гонку.\n3. Завершить гонку.\nПовторить п.п. 1-3 для каждого гонщика.\nВыберите цвет сетки");
+            if (colorDialog1.ShowDialog() == DialogResult.Cancel)
+                return;
+            // установка цвета формы
+            gridColor = colorDialog1.Color;
+
         }
 
         private void button1_Click(object sender, EventArgs e)
